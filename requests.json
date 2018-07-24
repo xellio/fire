@@ -1,0 +1,12 @@
+[
+    {
+        "METHOD": "GET",
+        "URL": "http://www.prillwitz.io",
+        "HEADERS": {
+            "User-Agent": "fire"
+        },        
+        "PAYLOAD": {
+            "block": "true"
+        }
+    }
+]
