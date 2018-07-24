@@ -32,7 +32,7 @@ func main() {
 		return
 	}
 
-	var requests []fire.Request
+	var requests []*fire.Request
 	err = json.Unmarshal(byteValue, &requests)
 	if err != nil {
 		showUsage(errors.New("Problem parsing the JSON file."))
@@ -42,14 +42,13 @@ func main() {
 	var wg sync.WaitGroup
 	for _, req := range requests {
 		wg.Add(1)
-		go func() {
+		go func(req *fire.Request) {
 			defer wg.Done()
-
 			err := req.Fire()
 			if err != nil {
 				log.Println(err)
 			}
-		}()
+		}(req)
 	}
 	wg.Wait()
 
