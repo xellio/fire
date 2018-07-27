@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 var defaultUserAgent = "fire"
@@ -19,10 +20,18 @@ var methods = map[string]bool{
 }
 
 type Request struct {
-	Method  string            `json:"METHOD"`
-	URL     string            `json:"URL"`
-	Headers map[string]string `json:"HEADERS"`
-	Payload map[string]string `json:"PAYLOAD"`
+	Method    string            `json:"METHOD"`
+	URL       string            `json:"URL"`
+	Headers   map[string]string `json:"HEADERS"`
+	Payload   map[string]string `json:"PAYLOAD"`
+	Timestamp int64
+	Response  *Response
+}
+
+type Response struct {
+	*http.Response
+	Timestamp int64
+	Duration  int64
 }
 
 func IsSupportedMethod(check string) bool {
@@ -47,19 +56,19 @@ func (r *Request) hasUserAgent() bool {
 	return true
 }
 
-func (r *Request) Fire() error {
+func (r *Request) Fire() (*Response, error) {
 
 	if !IsSupportedMethod(r.Method) {
-		return errors.New("Unsupported http-method passed.")
+		return r.Response, errors.New("Unsupported http-method passed.")
 	}
 
 	if !IsValidURL(r.URL) {
-		return errors.New("Invalid URL passed.")
+		return r.Response, errors.New("Invalid URL passed.")
 	}
 
 	req, err := http.NewRequest(r.Method, r.URL, nil)
 	if err != nil {
-		return err
+		return r.Response, err
 	}
 
 	if !r.hasUserAgent() {
@@ -85,16 +94,24 @@ func (r *Request) Fire() error {
 	}
 
 	client := &http.Client{}
+	r.Timestamp = time.Now().UnixNano()
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		return r.Response, err
 	}
 	defer resp.Body.Close()
+	respTs := time.Now().UnixNano()
+
+	r.Response = &Response{
+		resp,
+		respTs,
+		(respTs - r.Timestamp) / int64(time.Millisecond),
+	}
 
 	outHeader, _ := json.Marshal(req.Header)
 	outForm, _ := json.Marshal(req.Form)
 
-	fmt.Printf("REQUEST:\t[%s]\t%s\nHEADERS:\t%s\nPAYLOAD:\t%s\nRESPONSE:\t%d\n", r.Method, req.URL, string(outHeader), string(outForm), resp.StatusCode)
+	fmt.Printf("REQUEST:\t[%s]\t%s\nHEADERS:\t%s\nPAYLOAD:\t%s\nRESPONSE:\t%d\nDURATION:\t%dms\n\n", r.Method, req.URL, string(outHeader), string(outForm), r.Response.StatusCode, r.Response.Duration)
 
-	return nil
+	return r.Response, nil
 }

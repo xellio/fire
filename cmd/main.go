@@ -44,7 +44,7 @@ func main() {
 		wg.Add(1)
 		go func(req *fire.Request) {
 			defer wg.Done()
-			err := req.Fire()
+			_, err := req.Fire()
 			if err != nil {
 				log.Println(err)
 			}
