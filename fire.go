@@ -8,6 +8,8 @@ import (
 	"net/url"
 )
 
+var defaultUserAgent = "fire"
+
 var methods = map[string]bool{
 	"GET":    true,
 	"POST":   true,
@@ -38,6 +40,13 @@ func IsValidURL(check string) bool {
 	return true
 }
 
+func (r *Request) hasUserAgent() bool {
+	if _, ok := r.Headers["User-Agent"]; !ok {
+		return false
+	}
+	return true
+}
+
 func (r *Request) Fire() error {
 
 	if !IsSupportedMethod(r.Method) {
@@ -51,6 +60,10 @@ func (r *Request) Fire() error {
 	req, err := http.NewRequest(r.Method, r.URL, nil)
 	if err != nil {
 		return err
+	}
+
+	if !r.hasUserAgent() {
+		r.Headers["User-Agent"] = defaultUserAgent
 	}
 
 	for header, value := range r.Headers {
