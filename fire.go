@@ -19,6 +19,9 @@ var methods = map[string]bool{
 	"PATCH":  true,
 }
 
+//
+// Request stores information about a request. If the request is executed/fired, the response result is added to the request.
+//
 type Request struct {
 	Method    string            `json:"METHOD"`
 	URL       string            `json:"URL"`
@@ -28,12 +31,18 @@ type Request struct {
 	Response  *Response
 }
 
+//
+// Response holds information about the http.Response, the Timestamp and the Duration. The Duration is calculated by the Requests Timestamp and the Response Timestamp
+//
 type Response struct {
 	*http.Response
 	Timestamp int64
 	Duration  int64
 }
 
+//
+// IsSupportedMethod checks if the passed `check` string is a valid method. The function uses a static map containing the known/supported methods for validation.
+//
 func IsSupportedMethod(check string) bool {
 	if _, ok := methods[check]; !ok {
 		return false
@@ -41,6 +50,9 @@ func IsSupportedMethod(check string) bool {
 	return true
 }
 
+//
+// IsValidURL checks if the passed `check` string is a valid URI. This function uses the url.ParseRequestURI function for validation.
+//
 func IsValidURL(check string) bool {
 	_, err := url.ParseRequestURI(check)
 	if err != nil {
@@ -49,6 +61,9 @@ func IsValidURL(check string) bool {
 	return true
 }
 
+//
+// hasUserAgent checks if the Request has a User-Agent header.
+//
 func (r *Request) hasUserAgent() bool {
 	if _, ok := r.Headers["User-Agent"]; !ok {
 		return false
@@ -56,6 +71,9 @@ func (r *Request) hasUserAgent() bool {
 	return true
 }
 
+//
+// Fire executes the request.
+//
 func (r *Request) Fire() (*Response, error) {
 
 	if !IsSupportedMethod(r.Method) {
