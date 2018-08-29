@@ -27,6 +27,7 @@ type Request struct {
 	URL       string            `json:"URL"`
 	Headers   map[string]string `json:"HEADERS"`
 	Payload   map[string]string `json:"PAYLOAD"`
+	Auth      map[string]string `json:"AUTH"`
 	Timestamp int64
 	Response  *Response
 }
@@ -71,6 +72,16 @@ func (r *Request) hasUserAgent() bool {
 	return true
 }
 
+func (r *Request) hasAuth() bool {
+	if _, ok := r.Auth["username"]; !ok {
+		return false
+	}
+	if _, ok := r.Auth["password"]; !ok {
+		return false
+	}
+	return true
+}
+
 //
 // Fire executes the request.
 //
@@ -95,6 +106,10 @@ func (r *Request) Fire() (*Response, error) {
 
 	for header, value := range r.Headers {
 		req.Header.Set(header, value)
+	}
+
+	if r.hasAuth() {
+		req.SetBasicAuth(r.Auth["username"], r.Auth["password"])
 	}
 
 	if r.Method == "GET" {

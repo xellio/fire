@@ -23,6 +23,10 @@ define requests in a JSON file
     {
         "METHOD": "GET",
         "URL": "http://www.prillwitz.io",
+        "AUTH": {
+            "username": "",
+            "password": ""
+        },
         "HEADERS": {
             "User-Agent": "fire"
         },        
