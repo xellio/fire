@@ -88,11 +88,11 @@ func (r *Request) hasAuth() bool {
 func (r *Request) Fire() (*Response, error) {
 
 	if !IsSupportedMethod(r.Method) {
-		return r.Response, errors.New("Unsupported http-method passed.")
+		return r.Response, errors.New("unsupported http-method passed")
 	}
 
 	if !IsValidURL(r.URL) {
-		return r.Response, errors.New("Invalid URL passed.")
+		return r.Response, errors.New("invalid URL passed")
 	}
 
 	req, err := http.NewRequest(r.Method, r.URL, nil)

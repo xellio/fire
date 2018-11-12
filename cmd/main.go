@@ -28,14 +28,14 @@ func main() {
 
 	byteValue, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
-		showUsage(errors.New("Problem reading the JSON file."))
+		showUsage(errors.New("problem reading the JSON file"))
 		return
 	}
 
 	var requests []*fire.Request
 	err = json.Unmarshal(byteValue, &requests)
 	if err != nil {
-		showUsage(errors.New("Problem parsing the JSON file."))
+		showUsage(errors.New("problem parsing the JSON file"))
 		return
 	}
 
