@@ -1,6 +1,7 @@
 package fire
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -126,7 +127,12 @@ func (r *Request) Fire() (*Response, error) {
 		req.Form = payload
 	}
 
-	client := &http.Client{}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+
+	//client := &http.Client{}
 	r.Timestamp = time.Now().UnixNano()
 	resp, err := client.Do(req)
 	if err != nil {
